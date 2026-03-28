@@ -10,6 +10,8 @@ import com.kova.aiticketinghub.repository.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TicketService {
@@ -45,6 +47,29 @@ public class TicketService {
                 saved.getDescription(),
                 saved.getStatus().name(),
                 saved.getCreatedAt()
+        );
+    }
+
+    public List<TicketResponse> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public TicketResponse getById(UUID id) {
+        Ticket t = repository.findById(id)
+                .orElseThrow();
+        return toResponse(t);
+    }
+
+    private TicketResponse toResponse(Ticket t) {
+        return new TicketResponse(
+                t.getId(),
+                t.getTitle(),
+                t.getDescription(),
+                t.getStatus().name(),
+                t.getCreatedAt()
         );
     }
 }
