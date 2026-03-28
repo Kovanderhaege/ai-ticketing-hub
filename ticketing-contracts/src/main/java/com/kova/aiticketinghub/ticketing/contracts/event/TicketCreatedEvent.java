@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub.messaging.event;
+package com.kova.aiticketinghub.ticketing.contracts.event;
 
 
 import java.time.Instant;
