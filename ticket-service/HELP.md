@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.kova.aiticketinghub.ticket-service' is invalid and this project uses 'com.kova.aiticketinghub.ticket_service' instead.
+* The original package name 'com.kova.aiticketinghub.ticket-service' is invalid and this project uses 'com.kova.aiticketinghub.app' instead.
 
 # Getting Started
 

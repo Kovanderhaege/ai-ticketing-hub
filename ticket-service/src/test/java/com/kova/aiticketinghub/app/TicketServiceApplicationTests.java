@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub.ticket_service;
+package com.kova.aiticketinghub.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
