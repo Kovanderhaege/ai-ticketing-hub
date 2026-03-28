@@ -1,12 +1,12 @@
-package com.kova.aiticketinghub.service;
+package com.kova.aiticketinghub.ticket.service;
 
-import com.kova.aiticketinghub.DTO.CreateTicketRequest;
-import com.kova.aiticketinghub.DTO.TicketResponse;
-import com.kova.aiticketinghub.entity.Ticket;
-import com.kova.aiticketinghub.entity.TicketStatus;
-import com.kova.aiticketinghub.messaging.TicketCreatedProducer;
-import com.kova.aiticketinghub.messaging.event.TicketCreatedEvent;
-import com.kova.aiticketinghub.repository.TicketRepository;
+import com.kova.aiticketinghub.ticket.DTO.CreateTicketRequest;
+import com.kova.aiticketinghub.ticket.DTO.TicketResponse;
+import com.kova.aiticketinghub.ticket.entity.Ticket;
+import com.kova.aiticketinghub.ticket.entity.TicketStatus;
+import com.kova.aiticketinghub.ticket.messaging.TicketCreatedProducer;
+import com.kova.aiticketinghub.ticket.repository.TicketRepository;
+import com.kova.aiticketinghub.ticketing.contracts.event.TicketCreatedEvent;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

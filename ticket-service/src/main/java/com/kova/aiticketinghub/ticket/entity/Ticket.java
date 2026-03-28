@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub.entity;
+package com.kova.aiticketinghub.ticket.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

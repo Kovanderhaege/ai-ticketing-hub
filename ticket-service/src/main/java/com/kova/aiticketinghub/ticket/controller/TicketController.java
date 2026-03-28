@@ -1,8 +1,8 @@
-package com.kova.aiticketinghub.controller;
+package com.kova.aiticketinghub.ticket.controller;
 
-import com.kova.aiticketinghub.DTO.CreateTicketRequest;
-import com.kova.aiticketinghub.DTO.TicketResponse;
-import com.kova.aiticketinghub.service.TicketService;
+import com.kova.aiticketinghub.ticket.DTO.CreateTicketRequest;
+import com.kova.aiticketinghub.ticket.DTO.TicketResponse;
+import com.kova.aiticketinghub.ticket.service.TicketService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

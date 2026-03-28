@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub;
+package com.kova.aiticketinghub.ticket;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

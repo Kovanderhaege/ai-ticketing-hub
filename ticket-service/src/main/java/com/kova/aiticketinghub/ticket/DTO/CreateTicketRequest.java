@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub.DTO;
+package com.kova.aiticketinghub.ticket.DTO;
 
 public record CreateTicketRequest(
         String title,

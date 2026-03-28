@@ -1,6 +1,6 @@
-package com.kova.aiticketinghub.messaging;
+package com.kova.aiticketinghub.ticket.messaging;
 
-import com.kova.aiticketinghub.messaging.event.TicketCreatedEvent;
+import com.kova.aiticketinghub.ticketing.contracts.event.TicketCreatedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
