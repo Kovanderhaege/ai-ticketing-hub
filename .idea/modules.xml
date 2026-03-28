@@ -3,6 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ai-ticketing-hub.iml" filepath="$PROJECT_DIR$/ai-ticketing-hub.iml" />
+      <module fileurl="file://$PROJECT_DIR$/analysis-service/src/main/analysis-service-main.iml" filepath="$PROJECT_DIR$/analysis-service/src/main/analysis-service-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/analysis-service/src/test/analysis-service-test.iml" filepath="$PROJECT_DIR$/analysis-service/src/test/analysis-service-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/notification-service/src/main/notification-service-main.iml" filepath="$PROJECT_DIR$/notification-service/src/main/notification-service-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/notification-service/src/test/notification-service-test.iml" filepath="$PROJECT_DIR$/notification-service/src/test/notification-service-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ticket-service/src/main/ticket-service-main.iml" filepath="$PROJECT_DIR$/ticket-service/src/main/ticket-service-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ticket-service/src/test/ticket-service-test.iml" filepath="$PROJECT_DIR$/ticket-service/src/test/ticket-service-test.iml" />
     </modules>
   </component>
 </project>
