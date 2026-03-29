@@ -1,4 +1,4 @@
-package com.kova.aiticketinghub.notification_service;
+package com.kova.aiticketinghub.notification.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

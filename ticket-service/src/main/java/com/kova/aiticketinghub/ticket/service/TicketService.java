@@ -32,22 +32,16 @@ public class TicketService {
         ticket.setCreatedAt(Instant.now());
         ticket.setUpdatedAt(Instant.now());
 
-        Ticket saved = repository.save(ticket);
+        Ticket savedTicket = repository.save(ticket);
 
         producer.send(new TicketCreatedEvent(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getDescription(),
-                saved.getCreatedAt()
+                savedTicket.getId(),
+                savedTicket.getTitle(),
+                savedTicket.getDescription(),
+                savedTicket.getCreatedAt()
         ));
 
-        return new TicketResponse(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getDescription(),
-                saved.getStatus().name(),
-                saved.getCreatedAt()
-        );
+        return toResponse(savedTicket);
     }
 
     public List<TicketResponse> getAll() {
@@ -63,13 +57,17 @@ public class TicketService {
         return toResponse(t);
     }
 
-    private TicketResponse toResponse(Ticket t) {
+    private TicketResponse toResponse(Ticket ticket) {
         return new TicketResponse(
-                t.getId(),
-                t.getTitle(),
-                t.getDescription(),
-                t.getStatus().name(),
-                t.getCreatedAt()
+                ticket.getId(),
+                ticket.getTitle(),
+                ticket.getDescription(),
+                ticket.getStatus() != null ? ticket.getStatus().name() : null,
+                ticket.getCategory() != null ? ticket.getCategory().name() : null,
+                ticket.getPriority() != null ? ticket.getPriority().name() : null,
+                ticket.getSummary(),
+                ticket.getCreatedAt(),
+                ticket.getUpdatedAt()
         );
     }
 }

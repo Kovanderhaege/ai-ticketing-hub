@@ -9,5 +9,9 @@ public record TicketResponse(
         String title,
         String description,
         String status,
-        Instant createdAt
+        String category,
+        String priority,
+        String summary,
+        Instant createdAt,
+        Instant updatedAt
 ) {}
