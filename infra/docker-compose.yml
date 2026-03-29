@@ -1,13 +1,25 @@
 services:
-  postgres:
+  ticket-db:
     image: postgres:16
-    container_name: ai-ticketing-postgres
+    container_name: ai-ticketing-ticket-db
     environment:
       POSTGRES_DB: ticketdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  notification-db:
+    image: postgres:16
+    container_name: ai-ticketing-notification-db
+    environment:
+      POSTGRES_DB: notificationdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
