@@ -1,37 +1,43 @@
 package com.kova.aiticketinghub.notification.service;
 
-import com.kova.aiticketinghub.notification.DTO.NotificationResult;
+import com.kova.aiticketinghub.notification.entity.Notification;
+import com.kova.aiticketinghub.notification.repository.NotificationRepository;
 import com.kova.aiticketinghub.ticketing.contracts.event.TicketAnalyzedEvent;
+import com.kova.aiticketinghub.ticketing.contracts.event.enums.TicketPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class NotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class.getName());
 
-    private final List<NotificationResult> notificationResults = new CopyOnWriteArrayList<>();
+    private final NotificationRepository notificationRepository;
+
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     public void handleHighPriority(TicketAnalyzedEvent event) {
-        notificationResults.add(toNotification(event));
+        notificationRepository.save(toNotification(event));
         log.debug("ALERT HIGH PRIORITY: {}", event.ticketId());
     }
 
-    private NotificationResult toNotification(TicketAnalyzedEvent event) {
-        return new NotificationResult(
-                event.ticketId(),
-                "High priority ticket detected",
-                event.priority(),
-                Instant.now()
-        );
+    private Notification toNotification(TicketAnalyzedEvent event) {
+        Notification notification = new Notification();
+        notification.setTicketId(event.ticketId());
+        notification.setMessage("High priority ticket detected");
+        notification.setPriority(TicketPriority.HIGH);
+        notification.setCreatedAt(Instant.now());
+
+        return notification;
     }
 
-    public List<NotificationResult> getAll() {
-        return notificationResults;
+    public List<Notification> getAll() {
+        return notificationRepository.findAll();
     }
 }
