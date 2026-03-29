@@ -1,11 +1,13 @@
 package com.kova.aiticketinghub.notification.service;
 
+import com.kova.aiticketinghub.notification.DTO.NotificationResponse;
 import com.kova.aiticketinghub.notification.entity.Notification;
 import com.kova.aiticketinghub.notification.repository.NotificationRepository;
 import com.kova.aiticketinghub.ticketing.contracts.event.TicketAnalyzedEvent;
 import com.kova.aiticketinghub.ticketing.contracts.event.enums.TicketPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -37,7 +39,17 @@ public class NotificationService {
         return notification;
     }
 
-    public List<Notification> getAll() {
-        return notificationRepository.findAll();
+    public List<NotificationResponse> getAll() {
+        return notificationRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream().map(this::toResponse).toList();
+    }
+
+    private NotificationResponse toResponse(Notification n) {
+        return new NotificationResponse(
+                n.getId(),
+                n.getTicketId(),
+                n.getMessage(),
+                n.getPriority().name(),
+                n.getCreatedAt()
+        );
     }
 }

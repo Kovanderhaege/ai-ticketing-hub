@@ -1,6 +1,6 @@
 package com.kova.aiticketinghub.notification.controller;
 
-import com.kova.aiticketinghub.notification.entity.Notification;
+import com.kova.aiticketinghub.notification.DTO.NotificationResponse;
 import com.kova.aiticketinghub.notification.service.NotificationService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class NotificationController {
     }
 
     @GetMapping
-    public List<Notification> getAll() {
+    public List<NotificationResponse> getAll() {
         return notificationService.getAll();
     }
 }
