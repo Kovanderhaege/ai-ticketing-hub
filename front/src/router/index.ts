@@ -5,11 +5,16 @@ import CreateTicketView from "../views/CreateTicketView.vue";
 import NotificationsView from "../views/NotificationsView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import { nextTick } from "vue";
+import LoginView from "../views/LoginView.vue";
+import { useAuth } from "../composables/useAuth";
+import { onUnauthorized } from "../api/client";
 
 const router = createRouter({
   history: createWebHistory(),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
+    { path: "/login", component: LoginView, meta: { title: "Connexion", public: true } },
+    { path: "/register", component: LoginView, meta: { title: "Créer un compte", public: true } },
     { path: "/", redirect: "/tickets" },
     {
       path: "/tickets",
@@ -37,6 +42,20 @@ const router = createRouter({
       meta: { title: "Page introuvable" },
     },
   ],
+});
+
+router.beforeEach(async (to) => {
+  const { user, restoreSession } = useAuth();
+  await restoreSession();
+  if (!user.value && !to.meta.public)
+    return { path: "/login", query: { redirect: to.fullPath } };
+  if (user.value && to.meta.public) return "/tickets";
+});
+
+onUnauthorized(() => {
+  const current = router.currentRoute.value;
+  if (!current.meta.public)
+    void router.replace({ path: "/login", query: { redirect: current.fullPath, reason: "expired" } });
 });
 
 router.afterEach(async (to, from) => {
