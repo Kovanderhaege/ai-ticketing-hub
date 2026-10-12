@@ -1,39 +1,25 @@
-import type { Ticket } from "../types/ticket"
+import type { Ticket } from "../types/ticket";
+import { requestJson } from "./client";
 
-const BASE_URL = "http://localhost:8083/tickets"
+const BASE_URL = (
+  import.meta.env.VITE_TICKET_API_URL || "/api/tickets"
+).replace(/\/$/, "");
 
-export async function getTickets(): Promise<Ticket[]> {
-  const response = await fetch(BASE_URL)
-  if (!response.ok) {
-    throw new Error("Failed to fetch tickets")
-  }
-  return response.json()
+export function getTickets(signal?: AbortSignal): Promise<Ticket[]> {
+  return requestJson(BASE_URL, { signal });
 }
 
-export async function getTicket(id: string): Promise<Ticket> {
-  const response = await fetch(`${BASE_URL}/${id}`)
-  if (!response.ok) {
-    throw new Error("Failed to fetch tickets")
-  }
-  return response.json()
+export function getTicket(id: string, signal?: AbortSignal): Promise<Ticket> {
+  return requestJson(`${BASE_URL}/${encodeURIComponent(id)}`, { signal });
 }
 
-
-export async function createTicket(payload: {
-  title: string
-  description: string
+export function createTicket(payload: {
+  title: string;
+  description: string;
 }): Promise<Ticket> {
-  const response = await fetch(BASE_URL, {
+  return requestJson(BASE_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to create ticket")
-  }
-
-  return response.json()
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 }

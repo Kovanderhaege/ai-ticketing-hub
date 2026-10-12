@@ -1,11 +1,12 @@
-import type { Notification } from "../types/notification"
+import type { Notification } from "../types/notification";
+import { requestJson } from "./client";
 
-const BASE_URL = "http://localhost:8082/notification"
+const BASE_URL = (
+  import.meta.env.VITE_NOTIFICATION_API_URL || "/api/notifications"
+).replace(/\/$/, "");
 
-export async function getNotifications(): Promise<Notification[]> {
-  const response = await fetch(BASE_URL)
-  if (!response.ok) {
-    throw new Error("Failed to fetch notifications")
-  }
-  return response.json()
+export function getNotifications(
+  signal?: AbortSignal,
+): Promise<Notification[]> {
+  return requestJson(BASE_URL, { signal });
 }
