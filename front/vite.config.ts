@@ -4,6 +4,11 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const proxy = {
+    "/api/auth": {
+      target: env.TICKET_API_TARGET || "http://localhost:8083",
+      changeOrigin: true,
+      rewrite: (path: string) => path.replace(/^\/api\/auth/, "/auth"),
+    },
     "/api/tickets": {
       target: env.TICKET_API_TARGET || "http://localhost:8083",
       changeOrigin: true,

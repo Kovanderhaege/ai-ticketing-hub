@@ -1,9 +1,28 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { computed, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import AppIcon from "./components/AppIcon.vue";
+import { useAuth } from "./composables/useAuth";
 
 const route = useRoute();
+const router = useRouter();
+const { user, logout } = useAuth();
+const signingOut = ref(false);
+const logoutError = ref("");
+
+async function signOut() {
+  if (signingOut.value) return;
+  signingOut.value = true;
+  logoutError.value = "";
+  try {
+    await logout();
+    await router.replace("/login");
+  } catch (cause) {
+    logoutError.value = cause instanceof Error ? cause.message : "Impossible de vous déconnecter. Réessayez.";
+  } finally {
+    signingOut.value = false;
+  }
+}
 const section = computed(() =>
   route.path === "/notifications" ? "Notifications" : "Tickets",
 );
@@ -16,7 +35,11 @@ const today = new Intl.DateTimeFormat("fr-FR", {
 
 <template>
   <a class="skip-link" href="#main-content">Aller au contenu</a>
-  <div class="app-shell">
+  <main v-if="!user" id="main-content" class="auth-shell" tabindex="-1">
+    <RouterView v-if="route.meta.public" />
+    <p v-else role="status">Vérification de votre session…</p>
+  </main>
+  <div v-else class="app-shell">
     <aside class="sidebar">
       <RouterLink
         to="/tickets"
@@ -76,6 +99,8 @@ const today = new Intl.DateTimeFormat("fr-FR", {
           ><strong>{{ section }}</strong>
         </div>
         <div class="topbar-actions">
+          <span class="user-email" :title="user.email">{{ user.email }}</span>
+          <button type="button" class="button button-quiet" :disabled="signingOut" @click="signOut">{{ signingOut ? "Déconnexion…" : "Se déconnecter" }}</button>
           <span class="today">{{ today }}</span
           ><RouterLink
             class="icon-button"
@@ -85,7 +110,10 @@ const today = new Intl.DateTimeFormat("fr-FR", {
           /></RouterLink>
         </div>
       </header>
-      <main id="main-content" tabindex="-1"><RouterView /></main>
+      <main id="main-content" tabindex="-1">
+        <p v-if="logoutError" class="alert alert-error" role="alert">{{ logoutError }}</p>
+        <RouterView />
+      </main>
       <footer class="workspace-footer">
         <span>Kova · AI Ticketing Hub</span
         ><span>Chaque demande mérite un suivi.</span>

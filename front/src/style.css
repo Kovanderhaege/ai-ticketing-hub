@@ -1,3 +1,31 @@
+.auth-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: radial-gradient(ellipse at top left, #e0efe7, transparent 65%), #f6f8f7;
+}
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  padding: clamp(24px, 5vw, 40px);
+}
+.auth-heading { margin-bottom: 28px; }
+.auth-heading .brand-mark { margin-bottom: 24px; }
+.auth-heading .eyebrow { margin-bottom: 12px; }
+.auth-heading h1 { font-size: clamp(26px, 5vw, 32px); }
+.auth-card .field input { width: 100%; }
+.auth-card .alert { margin-bottom: 20px; }
+.auth-submit { width: 100%; margin-top: 28px; }
+.auth-switch { margin-top: 24px; text-align: center; color: var(--muted); }
+.auth-switch a { color: var(--green); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+.auth-notice { padding: 14px; margin-bottom: 20px; background: #edf5ef; border-radius: 10px; }
+.user-email { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 700px) {
+  .user-email { display: none; }
+  .topbar-actions { flex-wrap: wrap; justify-content: flex-end; }
+}
+
 :root {
   font-family:
     "Segoe UI",
