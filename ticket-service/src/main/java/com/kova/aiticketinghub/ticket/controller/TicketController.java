@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/ticket")
-@CrossOrigin(origins = "http://localhost:5173")
 public class TicketController {
 
     private final TicketService service;
