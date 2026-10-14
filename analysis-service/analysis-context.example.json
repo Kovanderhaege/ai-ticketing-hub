@@ -1,0 +1,17 @@
+{
+  "businessRules": "La priorité mesure l'urgence métier. Une interruption de production touchant tous les clients est HIGH. La sévérité mesure l'impact fonctionnel. N'attribuer un ticket qu'à une personne dont les compétences correspondent.",
+  "assignees": [
+    { "id": "tech@example.com", "name": "Équipe technique", "skills": ["backend", "authentification", "API", "production"] },
+    { "id": "billing@example.com", "name": "Équipe facturation", "skills": ["facturation", "paiements", "remboursements"] }
+  ],
+  "examples": [
+    {
+      "description": "Tous les utilisateurs sont bloqués à la connexion en production, aucun contournement.",
+      "category": "TECHNICAL",
+      "priority": "HIGH",
+      "severity": "BLOCKER",
+      "subject": "Connexion bloquée en production",
+      "assignee": "tech@example.com"
+    }
+  ]
+}
