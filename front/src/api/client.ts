@@ -17,12 +17,21 @@ export function onUnauthorized(listener: () => void) {
   return () => unauthorizedListeners.delete(listener);
 }
 
-export async function requestJson<T>(
+export function requestJson<T>(url: string, options: RequestInit = {}, notifyUnauthorized = true): Promise<T> {
+  return request<T>(url, options, notifyUnauthorized, "json");
+}
+
+export function requestBlob(url: string, options: RequestInit = {}): Promise<Blob> {
+  return request<Blob>(url, options, true, "blob");
+}
+
+async function request<T>(
   url: string,
   options: RequestInit = {},
   notifyUnauthorized = true,
+  responseType: "json" | "blob" = "json",
 ): Promise<T> {
-  const timeout = AbortSignal.timeout(12000);
+  const timeout = AbortSignal.timeout(options.body instanceof FormData || responseType === "blob" ? 120000 : 12000);
   const signal = options.signal
     ? AbortSignal.any([options.signal, timeout])
     : timeout;
@@ -55,12 +64,15 @@ export async function requestJson<T>(
         throw new Error(
           "Le service est momentanément indisponible. Réessayez dans quelques instants.",
         );
+      const details = await response.json().catch(() => null);
+      if (typeof details?.message === "string") throw new ApiError(response.status, details.message);
+      if (response.status === 413) throw new ApiError(413, "Maximum 10 Mo par fichier et 50 Mo par envoi.");
       throw new Error(
         "La demande n’a pas pu aboutir. Vérifiez les informations et réessayez.",
       );
     }
     if (response.status === 204) return undefined as T;
-    return (await response.json()) as T;
+    return (await (responseType === "blob" ? response.blob() : response.json())) as T;
   } catch (cause) {
     if (options.signal?.aborted) throw cause;
     if (timeout.aborted)

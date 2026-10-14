@@ -62,7 +62,7 @@ test("login resumes creation, survives reload and logout blocks browser back", a
   await page.goto("/tickets/new");
   await signIn(page);
   await expect(page).toHaveURL(/\/tickets\/new$/);
-  await expect(page.getByText("alice@example.com", { exact: true })).toBeVisible();
+  await expect(page.getByTitle("alice@example.com", { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Créer un ticket", exact: true })).toBeVisible();
   await page.getByLabel("Titre de la demande").fill("Mon ticket privé");

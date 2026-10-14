@@ -2,7 +2,16 @@ export const statusLabels: Record<string, string> = {
   NEW: "À analyser",
   ANALYZED: "Analysé",
   IN_PROGRESS: "En cours",
+  RESOLVED: "Résolu",
+  REOPENED: "Réouvert",
   CLOSED: "Clôturé",
+};
+
+export const typeLabels: Record<string, string> = {
+  BUG: "Anomalie", TASK: "Tâche", IMPROVEMENT: "Amélioration", SUPPORT: "Support",
+};
+export const severityLabels: Record<string, string> = {
+  MINOR: "Mineure", MAJOR: "Majeure", CRITICAL: "Critique", BLOCKER: "Bloquante",
 };
 
 export const priorityLabels: Record<string, string> = {

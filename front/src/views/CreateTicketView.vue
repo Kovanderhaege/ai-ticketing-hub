@@ -3,15 +3,24 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { createTicket } from "../api/ticketApi";
 import AppIcon from "../components/AppIcon.vue";
+import TicketFields from "../components/TicketFields.vue";
+import AttachmentPicker from "../components/AttachmentPicker.vue";
+import { ticketDraft, ticketPayload, validateFiles } from "../utils/ticketForm";
+import { useAuth } from "../composables/useAuth";
 
 const router = useRouter();
+const { user } = useAuth();
+const draft = ref(ticketDraft());
+const files = ref<File[]>([]);
+const creationMode = ref<"simple" | "complete">("simple");
 const title = ref("");
+const autoTitle = ref(false);
 const description = ref("");
 const submitting = ref(false);
 const attempted = ref(false);
 const error = ref("");
 const titleError = computed(() =>
-  attempted.value && !title.value.trim()
+  attempted.value && !autoTitle.value && !title.value.trim()
     ? "Donnez un titre à votre demande."
     : "",
 );
@@ -33,10 +42,13 @@ async function submit() {
   }
   submitting.value = true;
   try {
-    const ticket = await createTicket({
+    validateFiles(files.value);
+    const ticket = await createTicket(ticketPayload({
+      ...(creationMode.value === "complete" ? draft.value : ticketDraft()),
       title: title.value.trim(),
       description: description.value.trim(),
-    });
+      autoTitle: autoTitle.value,
+    }), files.value);
     await router.push({
       path: `/tickets/${ticket.id}`,
       query: { created: "1" },
@@ -70,11 +82,22 @@ async function submit() {
       <div class="panel-heading">
         <div>
           <h2>Créer un ticket</h2>
-          <p>Les deux champs sont obligatoires.</p>
+          <p>Décrivez la demande. Vous pouvez laisser l’IA formuler son titre.</p>
         </div>
         <span class="soft-icon"><AppIcon name="file" /></span>
       </div>
       <form novalidate :aria-busy="submitting" @submit.prevent="submit">
+        <fieldset class="creation-mode" :disabled="submitting">
+          <legend class="sr-only">Mode de création du ticket</legend>
+          <label>
+            <input v-model="creationMode" type="radio" name="creation-mode" value="simple" />
+            <span>Création simplifiée</span>
+          </label>
+          <label>
+            <input v-model="creationMode" type="radio" name="creation-mode" value="complete" />
+            <span>Création complète</span>
+          </label>
+        </fieldset>
         <div v-if="error" class="alert alert-error" role="alert">
           <AppIcon name="alert" />
           <div>
@@ -82,21 +105,25 @@ async function submit() {
             <p>{{ error }} Votre saisie a été conservée.</p>
           </div>
         </div>
+        <label class="automatic-title-option">
+          <input v-model="autoTitle" type="checkbox" :disabled="submitting" />
+          Générer le titre automatiquement
+        </label>
         <div class="field">
           <label for="ticket-title"
-            >Titre de la demande <span aria-hidden="true">*</span></label
+            >Titre de la demande <span v-if="!autoTitle" aria-hidden="true">*</span></label
           >
           <p id="title-hint" class="field-hint">
-            Un titre court qui résume le sujet.
+            {{ autoTitle ? 'Le titre sera proposé à partir de votre description.' : 'Un titre court qui résume le sujet.' }}
           </p>
           <input
             id="ticket-title"
             v-model="title"
             type="text"
-            required
+            :required="!autoTitle"
             maxlength="255"
             placeholder="Ex. : Impossible de me connecter à mon compte"
-            :disabled="submitting"
+            :disabled="submitting || autoTitle"
             :aria-invalid="Boolean(titleError)"
             :aria-describedby="
               titleError ? 'title-hint title-error' : 'title-hint'
@@ -141,11 +168,16 @@ async function submit() {
             >
           </div>
         </div>
+        <template v-if="creationMode === 'complete'">
+          <p class="reporter-note">Rapporteur : <strong>{{ user?.email }}</strong></p>
+          <TicketFields v-model="draft" :disabled="submitting" />
+        </template>
+        <AttachmentPicker v-model="files" :disabled="submitting" />
         <div class="form-info">
           <AppIcon name="sparkles" />
           <p>
-            La catégorie et la priorité seront déterminées automatiquement à
-            partir de votre description.
+            La catégorie, la priorité, la sévérité et l’attribution seront déterminées
+            à partir de votre description et des personnes éligibles. Vos choix manuels sont conservés.
           </p>
         </div>
         <div class="form-actions">

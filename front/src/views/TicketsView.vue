@@ -76,6 +76,10 @@ const filteredTickets = computed(() => {
               ticket.description,
               ticket.summary,
               ticket.id,
+              ticket.reporter,
+              ticket.assignee,
+              ticket.component,
+              ...(ticket.labels || []),
               categoryLabel(ticket.category),
             ].join(" "),
           ).includes(query)),
@@ -247,6 +251,8 @@ onMounted(load);
                 <p class="ticket-preview">
                   {{ ticket.summary || ticket.description }}
                 </p>
+                <p v-if="ticket.reporter || ticket.assignee" class="ticket-people">{{ ticket.reporter }}<template v-if="ticket.assignee"> · Assigné à {{ ticket.assignee }}</template></p>
+                <div v-if="ticket.labels?.length" class="label-list"><span v-for="label in ticket.labels" :key="label" class="badge">{{ label }}</span></div>
                 <span class="ticket-id"
                   >#{{ ticket.id.slice(0, 8).toUpperCase() }}</span
                 >
