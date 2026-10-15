@@ -82,6 +82,8 @@ public class Ticket {
     private String analysisFailureCode;
     private String analysisProvider;
     private String analysisModel;
+    @org.hibernate.annotations.ColumnDefault("false")
+    @Column(nullable = false)
     private boolean analysisFieldsTracked;
 
     @ElementCollection

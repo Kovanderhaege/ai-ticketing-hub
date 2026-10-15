@@ -233,7 +233,8 @@ async function downloadFile(file: TicketAttachment) {
               <h2>L’essentiel de votre demande</h2>
             </div>
           </div>
-          <div v-if="ticket.analysisStatus === 'FAILED'" class="alert alert-error" role="alert">
+          <p v-if="ticket.analysisStatus === 'DISABLED'" class="analysis-pending">L’analyse automatique est désactivée. Vous pouvez renseigner les champs du ticket manuellement.</p>
+          <div v-else-if="ticket.analysisStatus === 'FAILED'" class="alert alert-error" role="alert">
             <div><strong>L’analyse a échoué</strong><p>{{ analysisFailures[ticket.analysisFailureCode || ''] || 'L’analyse n’a pas abouti. Vous pouvez la relancer.' }}</p></div>
           </div>
           <p v-else-if="ticket.analysisStatus === 'PENDING'" class="analysis-pending" aria-live="polite">Analyse en cours. Actualisez dans quelques instants.</p>

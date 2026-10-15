@@ -15,16 +15,29 @@ public class TicketAnalysisService {
     private static final Set<String> FIELDS = Set.of("category", "priority", "severity", "subject", "summary", "assignee");
     private final LlmClient client;
     private final AnalysisContextLoader contexts;
-    private final AnalysisProperties config;
+    private final com.kova.aiticketinghub.analysis.config.AnalysisSettingsSource settings;
     private final ObjectMapper json = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
-    public TicketAnalysisService(LlmClient client, AnalysisContextLoader contexts, AnalysisProperties config) {
-        this.client = client;
-        this.contexts = contexts;
-        this.config = config;
+    @org.springframework.beans.factory.annotation.Autowired
+    public TicketAnalysisService(LlmClient client, AnalysisContextLoader contexts,
+            com.kova.aiticketinghub.analysis.config.AnalysisSettingsSource settings) {
+        this.client = client; this.contexts = contexts; this.settings = settings;
     }
-    public TicketAnalysisResult analyze(TicketCreatedEvent event) {
+    public TicketAnalysisService(LlmClient client, AnalysisContextLoader contexts, AnalysisProperties defaults) {
+        this(client, contexts, () -> defaults.copy());
+    }
+    public TicketAnalysisResult analyze(TicketCreatedEvent event) { return analyze(event, settings.snapshot()); }
+    public TicketAnalysisResult analyze(TicketCreatedEvent event, AnalysisProperties configuration) {
+        var config = configuration.copy();
+        try {
+            if (!config.isEnabled()) throw new LlmException("ANALYSIS_DISABLED", false);
+            var result = perform(event, config);
+            return new TicketAnalysisResult(result.category(), result.priority(), result.summary(), result.severity(),
+                    result.subject(), result.assignee(), config.getProvider().name(), config.getModel());
+        } catch (LlmException exception) { throw exception.withConfiguration(config); }
+    }
+    private TicketAnalysisResult perform(TicketCreatedEvent event, AnalysisProperties config) {
         var context = contexts.load();
         var schema = schema(context);
         if (config.getMaxAttempts() < 1 || config.getMaxAttempts() > 3) throw new LlmException("CONFIGURATION_ERROR", false);
@@ -45,7 +58,7 @@ public class TicketAnalysisService {
                 .put("environment", event.environment()).put("stepsToReproduce", event.stepsToReproduce())
                 .put("expectedResult", event.expectedResult()).put("actualResult", event.actualResult());
         for (int attempt = 1; ; attempt++) {
-            try { return validate(client.complete(instructions, input.toString(), schema), context); }
+            try { return validate(client.complete(instructions, input.toString(), schema, config), context); }
             catch (LlmException exception) {
                 if (!exception.retryable() || attempt >= config.getMaxAttempts()) throw exception;
                 try { Thread.sleep(500L * attempt); }

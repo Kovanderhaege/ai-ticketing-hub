@@ -24,7 +24,7 @@ export interface Ticket {
   technicalSolution: string | null
   labels: string[]
   attachments: TicketAttachment[]
-  analysisStatus?: "PENDING" | "SUCCEEDED" | "FAILED" | null
+  analysisStatus?: "PENDING" | "SUCCEEDED" | "FAILED" | "DISABLED" | null
   analysisFailureCode?: string | null
   analysisProvider?: string | null
   analysisModel?: string | null

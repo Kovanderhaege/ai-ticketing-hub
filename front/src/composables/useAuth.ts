@@ -5,6 +5,7 @@ import { AUTH_URL } from "../api/config";
 interface User {
   id: string;
   email: string;
+  role?: "USER" | "ADMIN";
 }
 
 const user = shallowRef<User | null>(null);

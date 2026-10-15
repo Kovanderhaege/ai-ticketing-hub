@@ -17,8 +17,8 @@ export function onUnauthorized(listener: () => void) {
   return () => unauthorizedListeners.delete(listener);
 }
 
-export function requestJson<T>(url: string, options: RequestInit = {}, notifyUnauthorized = true): Promise<T> {
-  return request<T>(url, options, notifyUnauthorized, "json");
+export function requestJson<T>(url: string, options: RequestInit = {}, notifyUnauthorized = true, timeoutMs?: number): Promise<T> {
+  return request<T>(url, options, notifyUnauthorized, "json", timeoutMs);
 }
 
 export function requestBlob(url: string, options: RequestInit = {}): Promise<Blob> {
@@ -30,8 +30,9 @@ async function request<T>(
   options: RequestInit = {},
   notifyUnauthorized = true,
   responseType: "json" | "blob" = "json",
+  timeoutMs?: number,
 ): Promise<T> {
-  const timeout = AbortSignal.timeout(options.body instanceof FormData || responseType === "blob" ? 120000 : 12000);
+  const timeout = AbortSignal.timeout(timeoutMs ?? (options.body instanceof FormData || responseType === "blob" ? 120000 : 12000));
   const signal = options.signal
     ? AbortSignal.any([options.signal, timeout])
     : timeout;
@@ -52,19 +53,19 @@ async function request<T>(
         if (notifyUnauthorized) unauthorizedListeners.forEach((listener) => listener());
         throw new ApiError(401, "Votre session a expiré. Connectez-vous pour continuer.");
       }
+      const details = await response.json().catch(() => null);
       if (response.status === 403)
         throw new ApiError(403, "La vérification de sécurité a échoué. Réessayez.");
       if (response.status === 409)
-        throw new ApiError(409, "Cette adresse e-mail est déjà utilisée. Connectez-vous à votre compte.");
+        throw new ApiError(409, typeof details?.message === "string" ? details.message : "Cette adresse e-mail est déjà utilisée. Connectez-vous à votre compte.");
       if (response.status === 404)
         throw new Error(
           "Cette ressource est introuvable. Elle a peut-être été supprimée.",
         );
       if (response.status >= 500)
         throw new Error(
-          "Le service est momentanément indisponible. Réessayez dans quelques instants.",
+          typeof details?.message === "string" ? details.message : "Le service est momentanément indisponible. Réessayez dans quelques instants.",
         );
-      const details = await response.json().catch(() => null);
       if (typeof details?.message === "string") throw new ApiError(response.status, details.message);
       if (response.status === 413) throw new ApiError(413, "Maximum 10 Mo par fichier et 50 Mo par envoi.");
       throw new Error(

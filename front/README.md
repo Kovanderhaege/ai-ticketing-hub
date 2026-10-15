@@ -21,12 +21,13 @@ Le proxy Vite utilise les routes définies par les contrôleurs Java :
 | Requête du front                     | Service local                                   |
 | ------------------------------------ | ----------------------------------------------- |
 | `/api/auth/*`                        | `http://localhost:8083/auth/*`                  |
+| `/api/admin/*`                       | `http://localhost:8083/admin/*`                 |
 | `/api/tickets` et `/api/tickets/:id` | `http://localhost:8083/ticket` et `/ticket/:id` |
 | `/api/notifications`                 | `http://localhost:8082/notification`            |
 
 Pour modifier les cibles, copier `.env.example` dans `.env.local` puis ajuster `TICKET_API_TARGET` et `NOTIFICATION_API_TARGET`. Redémarrer Vite après modification.
 
-Pour un déploiement statique, configurer les mêmes routes `/api` dans le serveur web, ou définir `VITE_AUTH_API_URL`, `VITE_TICKET_API_URL` et `VITE_NOTIFICATION_API_URL` avant le build. Ces URL sont publiques et ne doivent contenir aucun secret. Privilégier une origine HTTPS commune au front et aux API, transmettre les cookies et définir `SESSION_COOKIE_SECURE=true` côté ticket-service. Pour une autre origine sur le même site, configurer `FRONTEND_ORIGIN` dans les deux services. Le proxy Vite est disponible uniquement pour le développement et `npm run preview`.
+Pour un déploiement statique, configurer les mêmes routes `/api` dans le serveur web, ou définir `VITE_AUTH_API_URL`, `VITE_TICKET_API_URL`, `VITE_NOTIFICATION_API_URL` et `VITE_AI_ADMIN_API_URL` avant le build. Ces URL sont publiques et ne doivent contenir aucun secret. Privilégier une origine HTTPS commune au front et aux API, transmettre les cookies et définir `SESSION_COOKIE_SECURE=true` côté ticket-service. Pour une autre origine sur le même site, configurer `FRONTEND_ORIGIN` dans les deux services. Le proxy Vite est disponible uniquement pour le développement et `npm run preview`.
 
 ## Comptes et connexion
 
@@ -36,6 +37,7 @@ La session est restaurée auprès du serveur à chaque navigation ; les réponse
 
 ## Fonctionnalités
 
+- Page **Administration** (`/admin/ai`) réservée au rôle `ADMIN` : choix du fournisseur et du modèle, paramètres avancés, découverte Ollama, tests sur une saisie non enregistrée et sauvegarde de la configuration. Voir [la mise en service](../AI_ADMIN.md) pour le compte administrateur et la liaison entre services.
 - Indicateurs calculés à partir des tickets chargés.
 - Recherche sans distinction de casse ou d’accents, filtres par statut et priorité, tri et pagination.
 - Création d’un ticket : titre et description obligatoires, limites de 255 et 2 000 caractères alignées sur les colonnes du serveur.

@@ -43,7 +43,7 @@ public class AuthController {
         }
         try {
             AppUser user = users.saveAndFlush(new AppUser(normalizeEmail(request.email()), passwords.encode(request.password())));
-            return new UserResponse(user.getId(), user.getEmail());
+            return new UserResponse(user.getId(), user.getEmail(), user.getRole().name());
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette adresse e-mail est déjà utilisée.");
         }
@@ -53,7 +53,7 @@ public class AuthController {
     public UserResponse me(Authentication authentication) {
         AppUser user = users.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-        return new UserResponse(user.getId(), user.getEmail());
+        return new UserResponse(user.getId(), user.getEmail(), user.getRole().name());
     }
 
     static String normalizeEmail(String email) {
@@ -68,6 +68,6 @@ public class AuthController {
 
     public record RegisterRequest(@NotBlank @Email @Size(max = 254) String email,
                                   @NotBlank @Size(min = 12, max = 72) String password) {}
-    public record UserResponse(UUID id, String email) {}
+    public record UserResponse(UUID id, String email, String role) {}
     public record CsrfResponse(String headerName, String token) {}
 }

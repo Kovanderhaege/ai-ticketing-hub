@@ -11,13 +11,11 @@ import static com.kova.aiticketinghub.analysis.config.AnalysisProperties.Provide
 
 @Component
 public class HttpLlmClient implements LlmClient {
-    private final AnalysisProperties config;
     private final ObjectMapper json = new ObjectMapper();
-    public HttpLlmClient(AnalysisProperties config) { this.config = config; }
 
     @Override
-    public String complete(String instructions, String ticket, JsonNode schema) {
-        validateConfig();
+    public String complete(String instructions, String ticket, JsonNode schema, AnalysisProperties config) {
+        validateConfig(config);
         var body = json.createObjectNode().put("model", config.getModel()).put("stream", false);
         String path;
         if (config.getProvider() == OPENAI) {
@@ -56,7 +54,7 @@ public class HttpLlmClient implements LlmClient {
             }
         }
         try {
-            var request = HttpRequest.newBuilder(URI.create(baseUrl() + path))
+            var request = HttpRequest.newBuilder(URI.create(baseUrl(config) + path))
                     .timeout(config.getTimeout()).header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)));
             if (config.getProvider() == ANTHROPIC)
@@ -71,7 +69,7 @@ public class HttpLlmClient implements LlmClient {
                     throw new LlmException(status == 401 || status == 403 ? "AUTHENTICATION_ERROR" : "PROVIDER_ERROR",
                             status == 429 || status >= 500);
                 if (response.body().length() > 1_048_576) throw new LlmException("INVALID_RESPONSE", false);
-                try { return extract(json.readTree(response.body())); }
+                try { return extract(json.readTree(response.body()), config); }
                 catch (com.fasterxml.jackson.core.JsonProcessingException exception) {
                     throw new LlmException("INVALID_RESPONSE", true);
                 }
@@ -86,7 +84,7 @@ public class HttpLlmClient implements LlmClient {
         }
     }
 
-    private String extract(JsonNode response) {
+    private String extract(JsonNode response, AnalysisProperties config) {
         if (response == null || !response.isObject()) throw new LlmException("INVALID_RESPONSE", true);
         if (config.getProvider() == OPENAI) {
             if (!"completed".equals(response.path("status").asText())) throw new LlmException("INVALID_RESPONSE", true);
@@ -120,11 +118,38 @@ public class HttpLlmClient implements LlmClient {
         return requireText(choice.path("message").path("content").asText());
     }
 
+    public java.util.List<String> listModels(AnalysisProperties config) {
+        if (config.getProvider() != OLLAMA) throw new LlmException("CONFIGURATION_ERROR", false);
+        var probe = config.copy(); probe.setModel("discovery"); validateConfig(probe);
+        try {
+            var request = HttpRequest.newBuilder(URI.create(baseUrl(config) + "/api/tags"))
+                    .timeout(config.getTimeout()).GET();
+            if (!config.getApiKey().isBlank()) request.header("Authorization", "Bearer " + config.getApiKey());
+            try (var client = HttpClient.newBuilder().connectTimeout(config.getConnectTimeout())
+                    .followRedirects(HttpClient.Redirect.NEVER).build()) {
+                var response = client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 401 || response.statusCode() == 403) throw new LlmException("AUTHENTICATION_ERROR", false);
+                if (response.statusCode() != 200) throw new LlmException("PROVIDER_ERROR", false);
+                if (response.body().length() > 1_048_576) throw new LlmException("INVALID_RESPONSE", false);
+                var models = json.readTree(response.body()).path("models");
+                if (!models.isArray()) throw new LlmException("INVALID_RESPONSE", false);
+                var names = new java.util.TreeSet<String>();
+                for (var model : models) {
+                    var name = model.path("name");
+                    if (name.isTextual() && !name.asText().isBlank() && name.asText().length() <= 255) names.add(name.asText());
+                }
+                return names.stream().limit(200).toList();
+            }
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt(); throw new LlmException("PROVIDER_UNAVAILABLE", false);
+        } catch (IOException exception) { throw new LlmException("PROVIDER_UNAVAILABLE", false); }
+    }
+
     private String requireText(String value) {
         if (value.isBlank()) throw new LlmException("INVALID_RESPONSE", true);
         return value;
     }
-    private String baseUrl() {
+    private String baseUrl(AnalysisProperties config) {
         if (!config.getBaseUrl().isBlank()) return config.getBaseUrl().replaceAll("/+$", "");
         return switch (config.getProvider()) {
             case OPENAI -> "https://api.openai.com/v1";
@@ -133,7 +158,7 @@ public class HttpLlmClient implements LlmClient {
             case OPENAI_COMPATIBLE -> throw new LlmException("CONFIGURATION_ERROR", false);
         };
     }
-    private void validateConfig() {
+    private void validateConfig(AnalysisProperties config) {
         if (config.getModel().isBlank() || config.getTimeout().isNegative() || config.getTimeout().isZero()
                 || config.getTimeout().toSeconds() > 120 || config.getConnectTimeout().isNegative()
                 || config.getConnectTimeout().isZero() || config.getMaxTokens() < 1 || config.getMaxTokens() > 32768
@@ -141,7 +166,7 @@ public class HttpLlmClient implements LlmClient {
                 || (config.getProvider() == ANTHROPIC && config.getOutputFormat() == JSON))
             throw new LlmException("CONFIGURATION_ERROR", false);
         try {
-            var uri = URI.create(baseUrl());
+            var uri = URI.create(baseUrl(config));
             if ((!"http".equals(uri.getScheme()) && !"https".equals(uri.getScheme())) || uri.getHost() == null
                     || uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null)
                 throw new LlmException("CONFIGURATION_ERROR", false);

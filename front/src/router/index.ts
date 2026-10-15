@@ -4,6 +4,7 @@ import TicketView from "../views/TicketView.vue";
 import CreateTicketView from "../views/CreateTicketView.vue";
 import NotificationsView from "../views/NotificationsView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
+import AiSettingsView from "../views/AiSettingsView.vue";
 import { nextTick } from "vue";
 import LoginView from "../views/LoginView.vue";
 import { useAuth } from "../composables/useAuth";
@@ -13,6 +14,7 @@ const router = createRouter({
   history: createWebHistory(),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
+    { path: "/admin/ai", component: AiSettingsView, meta: { title: "Configuration de l’IA", admin: true } },
     { path: "/login", component: LoginView, meta: { title: "Connexion", public: true } },
     { path: "/register", component: LoginView, meta: { title: "Créer un compte", public: true } },
     { path: "/", redirect: "/tickets" },
@@ -49,6 +51,7 @@ router.beforeEach(async (to) => {
   await restoreSession();
   if (!user.value && !to.meta.public)
     return { path: "/login", query: { redirect: to.fullPath } };
+  if (to.meta.admin && user.value?.role !== "ADMIN") return "/tickets";
   if (user.value && to.meta.public) return "/tickets";
 });
 

@@ -21,6 +21,13 @@ public class AppUser {
     @Column(nullable = false, length = 100)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 16)
+    private UserRole role = UserRole.USER;
+
+    public UserRole getRole() { return role == null ? UserRole.USER : role; }
+    public void grantAdmin() { role = UserRole.ADMIN; }
+
     public AppUser(String email, String passwordHash) {
         this.email = email;
         this.passwordHash = passwordHash;

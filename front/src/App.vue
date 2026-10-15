@@ -24,7 +24,7 @@ async function signOut() {
   }
 }
 const section = computed(() =>
-  route.path === "/notifications" ? "Notifications" : "Tickets",
+  route.path.startsWith("/admin/") ? "Administration" : route.path === "/notifications" ? "Notifications" : "Tickets",
 );
 const today = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -54,7 +54,7 @@ const today = new Intl.DateTimeFormat("fr-FR", {
         ><span>Espace support<small>Votre centre de suivi</small></span>
       </div>
       <p class="nav-label">ESPACE DE TRAVAIL</p>
-      <nav aria-label="Navigation principale" class="main-nav">
+      <nav aria-label="Navigation principale" class="main-nav" :class="{ 'has-administration': user.role === 'ADMIN' }">
         <RouterLink
           to="/tickets"
           :class="{
@@ -75,6 +75,7 @@ const today = new Intl.DateTimeFormat("fr-FR", {
           :class="{ active: route.path === '/notifications' }"
           ><AppIcon name="bell" /><span>Notifications</span></RouterLink
         >
+        <RouterLink v-if="user.role === 'ADMIN'" to="/admin/ai" :class="{ active: route.path === '/admin/ai' }"><AppIcon name="sparkles" /><span>Administration</span></RouterLink>
       </nav>
       <div class="sidebar-note">
         <span class="note-icon"><AppIcon name="sparkles" /></span>

@@ -54,7 +54,7 @@ class LlmAnalysisTests {
                 Instant.now(), UUID.randomUUID(), "Auth", "production", "Se connecter", "Session ouverte", "Erreur 500");
     }
     private TicketAnalysisService service(AnalysisProperties config) {
-        return new TicketAnalysisService(new HttpLlmClient(config), new AnalysisContextLoader(config), config);
+        return new TicketAnalysisService(new HttpLlmClient(), new AnalysisContextLoader(config), config);
     }
     private String envelope(AnalysisProperties.Provider provider, String content) throws Exception {
         return switch (provider) {
@@ -170,7 +170,7 @@ class LlmAnalysisTests {
                 VALID.replace("\"priority\":\"HIGH\"", "\"priority\":\"HIGH\",\"priority\":\"LOW\""),
                 VALID.replace("\"summary\":\"Connexion impossible en production\"", "\"summary\":42"));
         for (String response : invalid) {
-            when(client.complete(anyString(), anyString(), any())).thenReturn(response);
+            when(client.complete(anyString(), anyString(), any(), any())).thenReturn(response);
             assertThatThrownBy(() -> analyzer.analyze(event())).hasMessage("INVALID_RESPONSE");
         }
     }
@@ -221,7 +221,7 @@ class LlmAnalysisTests {
         var producer = mock(TicketAnalyzedProducer.class);
         var event = event();
         when(analyzer.analyze(event)).thenThrow(new LlmException("INVALID_RESPONSE", false));
-        new TicketCreatedConsumer(analyzer, producer, config).consume(event);
+        new TicketCreatedConsumer(analyzer, producer).consume(event);
         var captured = org.mockito.ArgumentCaptor.forClass(TicketAnalyzedEvent.class);
         verify(producer).send(captured.capture());
         assertThat(captured.getValue().analysisStatus()).isEqualTo(AnalysisStatus.FAILED);

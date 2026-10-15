@@ -31,7 +31,7 @@ public class SecurityConfig {
     @Bean
     UserDetailsService userDetailsService(UserRepository users) {
         return email -> users.findByEmail(AuthController.normalizeEmail(email))
-                .map(user -> User.withUsername(user.getEmail()).password(user.getPasswordHash()).roles("USER").build())
+                .map(user -> User.withUsername(user.getEmail()).password(user.getPasswordHash()).roles(user.getRole().name()).build())
                 .orElseThrow(() -> new UsernameNotFoundException("Identifiants invalides"));
     }
 
@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .requestCache(cache -> cache.disable())
                 .exceptionHandling(errors -> errors

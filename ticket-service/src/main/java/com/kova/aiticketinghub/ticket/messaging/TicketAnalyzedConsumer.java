@@ -30,7 +30,10 @@ public class TicketAnalyzedConsumer {
         if (!Objects.equals(event.requestId(), ticket.getAnalysisRequestId())) return;
         if (event.requestId() != null && ticket.getAnalysisStatus() != AnalysisStatus.PENDING) return;
         if (event.analysisStatus() == AnalysisStatus.PENDING) throw new IllegalArgumentException("Analysis result must be final");
-        if (event.analysisStatus() == AnalysisStatus.FAILED) {
+        if (event.analysisStatus() == AnalysisStatus.DISABLED) {
+            ticket.setAnalysisStatus(AnalysisStatus.DISABLED);
+            ticket.setAnalysisFailureCode(null);
+        } else if (event.analysisStatus() == AnalysisStatus.FAILED) {
             ticket.setAnalysisStatus(AnalysisStatus.FAILED);
             ticket.setAnalysisFailureCode(event.failureCode());
         } else {

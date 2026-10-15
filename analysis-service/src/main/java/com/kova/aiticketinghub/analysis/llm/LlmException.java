@@ -9,6 +9,13 @@ public class LlmException extends RuntimeException {
         this.code = code;
         this.retryable = retryable;
     }
+    private String provider;
+    private String model;
+    public LlmException withConfiguration(com.kova.aiticketinghub.analysis.config.AnalysisProperties config) {
+        provider = config.getProvider().name(); model = config.getModel(); return this;
+    }
+    public String provider() { return provider; }
+    public String model() { return model; }
     public String code() { return code; }
     public boolean retryable() { return retryable; }
 }

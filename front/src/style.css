@@ -1792,3 +1792,34 @@ select {
 .automatic-title-option { display: flex; align-items: center; gap: 0.65rem; margin: 1.25rem 0; }
 .automatic-title-option input { width: auto; }
 .analysis-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+
+.ai-settings-layout { grid-template-columns: minmax(0, 1fr) 290px; align-items: start; }
+.ai-settings-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.ai-enabled, .ai-key-clear { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-weight: 600; }
+.ai-enabled input, .ai-key-clear input { width: auto; flex-shrink: 0; }
+.ai-key-clear { font-size: 13px; margin-top: 12px; font-weight: 400; }
+.ai-location-note { display: flex; gap: 10px; background: #f0f6f1; padding: 15px; border-radius: 8px; margin: 0 0 24px; }
+.ai-location-note svg { flex-shrink: 0; margin-top: 3px; }
+.ai-location-note p { margin: 0; font-size: 13px; line-height: 1.65; }
+.ai-model-row { display: flex; gap: 10px; }
+.ai-model-row input { min-width: 0; flex: 1; }
+.ai-model-row .button { flex-shrink: 0; }
+.ai-advanced { margin: 20px 0; }
+.ai-advanced .field-grid { margin-top: 20px; }
+.ai-test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 25px 0 12px; }
+.ai-settings-help { overflow-wrap: anywhere; }
+.ai-diagnostic { grid-column: 1 / -1; padding: 26px; overflow-wrap: anywhere; }
+.ai-diagnostic-success { border-top: 3px solid var(--primary, #176f55); }
+.ai-diagnostic-error { border-top: 3px solid #ad4c42; }
+.ai-diagnostic h2 { font-size: 19px; margin-bottom: 8px; }
+.ai-diagnostic dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
+.ai-diagnostic dt { font-size: 12px; color: #6c7d73; margin-bottom: 5px; }
+.ai-diagnostic dd { margin: 0; white-space: pre-wrap; }
+@media (max-width: 1100px) { .ai-settings-layout { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .ai-model-row { flex-direction: column; }
+  .ai-test-actions .button { width: 100%; }
+  .ai-diagnostic dl { grid-template-columns: 1fr; }
+  .main-nav.has-administration { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .main-nav.has-administration a { margin: 0; }
+}

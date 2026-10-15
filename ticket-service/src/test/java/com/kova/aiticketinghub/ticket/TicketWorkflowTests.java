@@ -86,6 +86,21 @@ class TicketWorkflowTests {
     }
 
     @Test
+    void disabledAnalysisEndsThePendingStateWithoutReplacingManualFieldsOrNotifying() throws Exception {
+        UUID id = create();
+        var pending = tickets.findById(id).orElseThrow();
+        consumer.consume(new TicketAnalyzedEvent(id, null, null, null, Instant.now(), pending.getAnalysisRequestId(),
+            null, null, null, AnalysisStatus.DISABLED, "ANALYSIS_DISABLED", "OLLAMA", ""));
+        mvc.perform(get("/ticket/" + id)).andExpect(status().isOk())
+            .andExpect(jsonPath("analysisStatus").value("DISABLED"))
+            .andExpect(jsonPath("analysisFailureCode").isEmpty())
+            .andExpect(jsonPath("assignee").value("bob@example.com"))
+            .andExpect(jsonPath("severity").value("CRITICAL"))
+            .andExpect(jsonPath("title").value("Connexion impossible"));
+        verifyNoInteractions(appliedProducer);
+    }
+
+    @Test
     void editPersistsAndLateAnalysisPreservesManualClassificationAndStatus() throws Exception {
         UUID id = create();
         String edited = DETAILS.replace("\"labels\":", "\"status\":\"RESOLVED\",\"category\":\"ACCOUNT\",\"priority\":\"HIGH\",\"labels\":")
